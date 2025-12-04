@@ -1,0 +1,52 @@
+# ---- Django ----
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+static/
+.env
+
+# ---- Django Migrations ----
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# ---- Python ----
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ---- Environnements virtuels ----
+venv/
+ENV/
+env/
+.venv/
+
+# ---- VS Code ----
+.vscode/
+
+# ---- OS Files ----
+.DS_Store
+Thumbs.db
