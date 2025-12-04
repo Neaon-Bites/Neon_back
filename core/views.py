@@ -6,15 +6,26 @@ from .serializers import (
 )
 
 class SuperAdminViewSet(viewsets.ModelViewSet):
-    queryset = SuperAdmin.objects.all()
+    """
+    CRUD complet pour les Super Admins.
+    """
+    queryset = SuperAdmin.objects.all().order_by('-created_at')
     serializer_class = SuperAdminSerializer
 
+
 class InfluencerViewSet(viewsets.ModelViewSet):
-    queryset = Influencer.objects.all()
+    """
+    CRUD complet pour les Influenceurs.
+    """
+    queryset = Influencer.objects.all().order_by('-created_at')
     serializer_class = InfluencerSerializer
 
+
 class SiteViewSet(viewsets.ModelViewSet):
-    queryset = Site.objects.all()
+    """
+    CRUD complet pour les Sites.
+    """
+    queryset = Site.objects.all().order_by('-created_at')
     serializer_class = SiteSerializer
 
 class PageViewSet(viewsets.ModelViewSet):
