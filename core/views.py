@@ -11,6 +11,8 @@ class SuperAdminViewSet(viewsets.ModelViewSet):
     """
     queryset = SuperAdmin.objects.all().order_by('-created_at')
     serializer_class = SuperAdminSerializer
+    filterset_fields = ['username', 'email', 'created_at', 'id']
+    
 
 
 class InfluencerViewSet(viewsets.ModelViewSet):
@@ -19,7 +21,7 @@ class InfluencerViewSet(viewsets.ModelViewSet):
     """
     queryset = Influencer.objects.all().order_by('-created_at')
     serializer_class = InfluencerSerializer
-
+    filterset_fields = ['username', 'email', 'created_at', 'id']
 
 class SiteViewSet(viewsets.ModelViewSet):
     """
@@ -27,28 +29,26 @@ class SiteViewSet(viewsets.ModelViewSet):
     """
     queryset = Site.objects.all().order_by('-created_at')
     serializer_class = SiteSerializer
+    filterset_fields = ['owner', 'name', 'domain_url', 'created_at', 'id']
 
 class PageViewSet(viewsets.ModelViewSet):
     queryset = Page.objects.all()
     serializer_class = PageSerializer
     
-    filterset_fields = ['site'] 
+    filterset_fields = ['site', 'title', 'slug', 'created_at', 'id']
 
 
 class PublicationViewSet(viewsets.ModelViewSet):
     queryset = Publication.objects.all()
     serializer_class = PublicationSerializer
-    
-    filterset_fields = ['page']
+    filterset_fields = ['page', 'created_at' , 'category' , 'title' , 'id']
 
 class SiteUserViewSet(viewsets.ModelViewSet):
     queryset = SiteUser.objects.all()
     serializer_class = SiteUserSerializer
-    
-    filterset_fields = ['site', 'email']
-
+    filterset_fields =  ['site', 'username', 'email', 'created_at']
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     
-    filterset_fields = ['publication', 'author']
+    filterset_fields = ['site' , 'author', 'publication' , 'is_approved' , 'created_at']
