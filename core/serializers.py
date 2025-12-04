@@ -58,22 +58,30 @@ class SiteSerializer(serializers.ModelSerializer):
 class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = '__all__'
+        fields = ['id', 'title', 'slug', 'is_published', 'created_at', 'site']
+        read_only_fields = ['created_at']
 
 class PublicationSerializer(serializers.ModelSerializer):
+    media_assets = serializers.JSONField(required=False, allow_null=True)
+
     class Meta:
         model = Publication
-        fields = '__all__'
+        fields = ['id', 'title', 'category', 'content_text', 'media_assets', 'created_at', 'page']
         read_only_fields = ['created_at']
 
 class SiteUserSerializer(serializers.ModelSerializer):
+    password_hash = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = SiteUser
-        fields = '__all__'
+        fields = ['id', 'username', 'email', 'password_hash', 'avatar_url', 'created_at', 'site']
         read_only_fields = ['created_at']
 
 class CommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+
     class Meta:
         model = Comment
-        fields = '__all__'
-        read_only_fields = ['created_at', 'is_approved']
+        fields = ['id', 'content', 'media_url', 'is_approved', 'created_at', 'publication', 'author', 'author_username']
+        read_only_fields = ['created_at', 'is_approved'] 
+        

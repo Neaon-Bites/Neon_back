@@ -31,15 +31,24 @@ class SiteViewSet(viewsets.ModelViewSet):
 class PageViewSet(viewsets.ModelViewSet):
     queryset = Page.objects.all()
     serializer_class = PageSerializer
+    
+    filterset_fields = ['site'] 
+
 
 class PublicationViewSet(viewsets.ModelViewSet):
     queryset = Publication.objects.all()
     serializer_class = PublicationSerializer
+    
+    filterset_fields = ['page']
 
 class SiteUserViewSet(viewsets.ModelViewSet):
     queryset = SiteUser.objects.all()
     serializer_class = SiteUserSerializer
+    
+    filterset_fields = ['site', 'email']
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    
+    filterset_fields = ['publication', 'author']
