@@ -66,8 +66,8 @@ class PublicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Publication
-        fields = ['id', 'title', 'category', 'content_text', 'media_assets', 'created_at', 'page']
-        read_only_fields = ['created_at']
+        fields = ['id', 'title', 'category', 'content_text', 'media_assets', 'likes', 'created_at', 'page']
+        read_only_fields = ['created_at', 'likes']
 
 class SiteUserSerializer(serializers.ModelSerializer):
     password_hash = serializers.CharField(write_only=True, required=False)

@@ -1,4 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.db.models import F
 from .models import SuperAdmin, Influencer, Site, Page, Publication, SiteUser, Comment
 from .serializers import (
     SuperAdminSerializer, InfluencerSerializer, SiteSerializer, 
@@ -42,6 +45,19 @@ class PublicationViewSet(viewsets.ModelViewSet):
     queryset = Publication.objects.all()
     serializer_class = PublicationSerializer
     filterset_fields = ['page', 'created_at' , 'category' , 'title' , 'id']
+
+    @action(detail=True, methods=['post'], url_path='like')
+    def like(self, request, pk=None):
+        publication = self.get_object()
+        publication.likes = F('likes') + 1
+        publication.save()
+        
+        publication.refresh_from_db()
+        
+        return Response({
+            "status": "liked",
+            "likes_count": publication.likes
+        }, status=status.HTTP_200_OK)
 
 class SiteUserViewSet(viewsets.ModelViewSet):
     queryset = SiteUser.objects.all()
