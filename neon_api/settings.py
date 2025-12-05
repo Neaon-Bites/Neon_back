@@ -135,4 +135,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
+   
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser', # Doit être présent
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ],
+    
 }

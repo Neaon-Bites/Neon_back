@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, views
 from rest_framework.decorators import action
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from django.db.models import F
 from .models import SuperAdmin, Influencer, Site, Page, Publication, SiteUser, Comment
@@ -88,13 +89,27 @@ class CommentViewSet(viewsets.ModelViewSet):
 class BaseSiteView(views.APIView):
     """Helper pour récupérer le site ciblé (Pour démo: prend le dernier créé si pas d'ID)"""
     def get_site(self, request):
-        site_id = request.query_params.get('site_id') or request.data.get('site_id')
+        # 1. Chercher d'abord dans l'URL (plus sûr, ne déclenche pas le parsing JSON)
+        site_id = request.query_params.get('site_id')
+        
+        # 2. Si non trouvé, essayer de lire le body JSON
+        if not site_id:
+            try:
+                # Vérifie si data existe pour éviter JSON parse error sur body vide
+                if request.data:
+                    site_id = request.data.get('site_id')
+            except ParseError:
+                # Si le body est mal formé, on ignore et on continue (fallback sur dernier site)
+                pass
+        
         if site_id:
             return get_object_or_404(Site, id=site_id)
         
+        # Fallback Demo: Dernier site créé
         site = Site.objects.last()
         if not site:
-            raise Exception("Aucun site trouvé en base de données.")
+            # On lève une exception spécifique pour être catchée plus haut
+            raise ValueError("Aucun site trouvé en base de données. Veuillez créer un site via l'admin ou l'API.")
         return site
 
 class SiteConfigView(BaseSiteView):
@@ -111,12 +126,19 @@ class SiteConfigView(BaseSiteView):
                 "published_at": site.published_at,
                 "updated_at": site.updated_at
             })
+        except ValueError as e:
+             return Response({"error": str(e)}, status=404)
         except Exception as e:
-            return Response({"error": str(e)}, status=404)
+            return Response({"error": str(e)}, status=500)
 
     def post(self, request):
         try:
+            # Sécurité : Vérifier si le body est vide avant tout
+            if not request.data:
+                 return Response({"error": "Le corps de la requête (JSON) est vide."}, status=400)
+
             site = self.get_site(request)
+            
             # On accepte soit "config" directement, soit tout le body
             new_config = request.data.get('config', request.data)
             
@@ -128,6 +150,8 @@ class SiteConfigView(BaseSiteView):
                 "config": site.config,
                 "updated_at": site.updated_at
             })
+        except ParseError:
+             return Response({"error": "JSON invalide envoyé."}, status=400)
         except Exception as e:
             return Response({"error": f"Erreur update: {str(e)}"}, status=500)
 
