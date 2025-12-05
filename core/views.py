@@ -26,6 +26,31 @@ class InfluencerViewSet(viewsets.ModelViewSet):
     serializer_class = InfluencerSerializer
     filterset_fields = ['username', 'email', 'created_at', 'id']
 
+    @action(detail=False, methods=['post'], url_path='login')
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            influencer = Influencer.objects.get(email=email)
+            
+            if influencer.password_hash == password:
+                return Response({
+                    "status": "success",
+                    "message": "Connexion réussie",
+                    "user": {
+                        "id": influencer.id,
+                        "username": influencer.username,
+                        "email": influencer.email,
+                        "profile_picture": influencer.profile_picture
+                    }
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Influencer.DoesNotExist:
+            return Response({"error": "Aucun compte trouvé avec cet email"}, status=status.HTTP_404_NOT_FOUND)
+
 class SiteViewSet(viewsets.ModelViewSet):
     """
     CRUD complet pour les Sites.
