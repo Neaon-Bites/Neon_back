@@ -136,3 +136,8 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+    "http://localhost:3000", 
+]
