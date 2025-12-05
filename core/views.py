@@ -83,30 +83,24 @@ class CommentViewSet(viewsets.ModelViewSet):
     filterset_fields = ['site' , 'author', 'publication' , 'is_approved' , 'created_at']
 
 
-# ==========================================
-# NOUVELLES VUES POUR LA GESTION CONFIG JSON
-# ==========================================
+# --- NOUVELLES VUES (CMS & Génération) ---
 
 class BaseSiteView(views.APIView):
-    """ Helper pour récupérer le site ciblé """
+    """Helper pour récupérer le site ciblé (Pour démo: prend le dernier créé si pas d'ID)"""
     def get_site(self, request):
-        # STRATÉGIE: On regarde si site_id est dans les params, 
-        # sinon on prend le premier site de la base (pour le test/démo)
-        # Dans la réalité: on utiliserait request.user.sites.first()
         site_id = request.query_params.get('site_id') or request.data.get('site_id')
-        
         if site_id:
             return get_object_or_404(Site, id=site_id)
         
-        # Fallback pour démo: dernier site créé
         site = Site.objects.last()
         if not site:
-            raise Exception("Aucun site trouvé. Créez un site d'abord.")
+            raise Exception("Aucun site trouvé en base de données.")
         return site
 
 class SiteConfigView(BaseSiteView):
     """
-    Gère GET et POST pour /cms/api/site-config/
+    GET: Récupère la config JSON du site.
+    POST: Met à jour la config JSON (Sauvegarde brouillon).
     """
     def get(self, request):
         try:
@@ -123,80 +117,60 @@ class SiteConfigView(BaseSiteView):
     def post(self, request):
         try:
             site = self.get_site(request)
-            new_config = request.data.get('config')
+            # On accepte soit "config" directement, soit tout le body
+            new_config = request.data.get('config', request.data)
             
-            if not new_config:
-                return Response({"error": "Config manquante"}, status=400)
-
-            # Mise à jour du JSON
             site.config = new_config
-            site.save() # updated_at se met à jour auto
+            site.save()
 
             return Response({
                 "id": site.id,
                 "config": site.config,
-                "published_at": site.published_at,
                 "updated_at": site.updated_at
             })
         except Exception as e:
-            return Response({"error": str(e)}, status=500)
+            return Response({"error": f"Erreur update: {str(e)}"}, status=500)
 
 class SitePublishView(BaseSiteView):
     """
-    Gère POST /cms/api/publish/
-    Génère les fichiers physiques et met à jour published_at
+    POST: Génère les fichiers HTML/CSS/JS physiques.
     """
     def post(self, request):
         try:
             site = self.get_site(request)
-            
-            # 1. Appel au générateur (utils.py)
             generator = StaticSiteGenerator(site)
             result = generator.generate()
 
-            # 2. Update DB
             site.published_at = timezone.now()
             site.save()
 
             return Response({
                 "status": "published",
                 "url": result['public_url'],
-                "files": {
-                    "html": result['html'],
-                    "css": result['css'],
-                    "js": result['js']
-                },
-                "published_at": site.published_at
+                "files": result
             })
-            
         except Exception as e:
-            return Response({"error": f"Erreur de publication: {str(e)}"}, status=500)
+            return Response({"error": str(e)}, status=500)
 
 class SiteExportView(BaseSiteView):
     """
-    Gère GET /cms/api/export/
-    Zippe le dossier généré et renvoie le fichier
+    GET: Télécharge le site sous format ZIP.
     """
     def get(self, request):
         try:
             site = self.get_site(request)
-            
             if not site.published_at:
-                return Response({"error": "Site not published yet"}, status=400)
+                return Response({"error": "Site non publié. Publiez-le d'abord."}, status=400)
                 
             generator = StaticSiteGenerator(site)
-            source_dir = generator.output_dir
             
-            # Création du ZIP en mémoire ou temp
+            # Création du ZIP
             zip_filename = f"{site.name}_export"
             zip_path = os.path.join(settings.MEDIA_ROOT, 'temp', zip_filename)
-            
-            # S'assurer que le dossier temp existe
             os.makedirs(os.path.dirname(zip_path), exist_ok=True)
             
-            shutil.make_archive(zip_path, 'zip', source_dir)
+            shutil.make_archive(zip_path, 'zip', generator.output_dir)
             
-            # Servir le fichier
             zip_file = open(f"{zip_path}.zip", 'rb')
             return FileResponse(zip_file, as_attachment=True, filename=f"{zip_filename}.zip")
 

@@ -16,8 +16,9 @@ router.register(r'comments', CommentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
- # Endpoints spécifiques pour le CMS Frontend
-    path('cms/api/site-config/', SiteConfigView.as_view(), name='site-config'),
-    path('cms/api/publish/', SitePublishView.as_view(), name='site-publish'),
-    path('cms/api/export/', SiteExportView.as_view(), name='site-export'),
+ # Routes spécifiques CMS Frontend
+    # NOTE: Si ce fichier est inclus via path('api/', ...), l'URL finale sera /api/cms/site-config/
+    path('cms/site-config/', SiteConfigView.as_view(), name='site-config'),
+    path('cms/publish/', SitePublishView.as_view(), name='site-publish'),
+    path('cms/export/', SiteExportView.as_view(), name='site-export'),
 ]
