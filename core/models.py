@@ -115,11 +115,23 @@ class SiteUser(models.Model):
     """
     L'utilisateur final (le fan/visiteur).
     """
+    # Définition des choix pour le privilège
+    class Privilege(models.TextChoices):
+        STANDARD = 'standard', 'Standard'
+        PREMIUM = 'premium', 'Premium'
+
     username = models.CharField(max_length=50)
     email = models.CharField(max_length=100) 
     password_hash = models.CharField(max_length=128, blank=True, null=True)
     avatar_url = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+ # Nouvel attribut privilège avec valeur par défaut
+    privilege = models.CharField(
+        max_length=10,
+        choices=Privilege.choices,
+        default=Privilege.STANDARD
+    )
 
     site = models.ForeignKey(
         Site, 

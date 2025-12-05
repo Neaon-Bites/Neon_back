@@ -29,7 +29,7 @@ class SiteViewSet(viewsets.ModelViewSet):
     """
     queryset = Site.objects.all().order_by('-created_at')
     serializer_class = SiteSerializer
-    filterset_fields = ['owner', 'name', 'domain_url', 'created_at', 'id']
+    filterset_fields = ['owner', 'name', 'domain_url', 'created_at', 'privilege', 'id']
 
 class PageViewSet(viewsets.ModelViewSet):
     queryset = Page.objects.all()

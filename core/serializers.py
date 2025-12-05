@@ -74,7 +74,7 @@ class SiteUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteUser
-        fields = ['id', 'username', 'email', 'password_hash', 'avatar_url', 'created_at', 'site']
+        fields = ['id', 'username', 'email', 'password_hash', 'avatar_url', 'privilege', 'created_at', 'site']
         read_only_fields = ['created_at']
 
 class CommentSerializer(serializers.ModelSerializer):
