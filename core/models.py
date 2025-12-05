@@ -95,6 +95,7 @@ class Publication(models.Model):
     content_text = models.TextField(blank=True, null=True)
     
     media_assets = models.JSONField(blank=True, null=True)
+    likes = models.PositiveIntegerField(default=0) 
     
     created_at = models.DateTimeField(auto_now_add=True)
     
