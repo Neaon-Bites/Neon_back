@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import F
+from django.contrib.auth.hashers import check_password
 from .models import SuperAdmin, Influencer, Site, Page, Publication, SiteUser, Comment
 from .serializers import (
     SuperAdminSerializer, InfluencerSerializer, SiteSerializer, 
@@ -31,10 +32,13 @@ class InfluencerViewSet(viewsets.ModelViewSet):
         email = request.data.get('email')
         password = request.data.get('password')
 
+        if not email or not password:
+            return Response({"error": "Veuillez fournir un email et un mot de passe"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             influencer = Influencer.objects.get(email=email)
             
-            if influencer.password_hash == password:
+            if check_password(password, influencer.password_hash):
                 return Response({
                     "status": "success",
                     "message": "Connexion réussie",
@@ -50,7 +54,6 @@ class InfluencerViewSet(viewsets.ModelViewSet):
         
         except Influencer.DoesNotExist:
             return Response({"error": "Aucun compte trouvé avec cet email"}, status=status.HTTP_404_NOT_FOUND)
-
 class SiteViewSet(viewsets.ModelViewSet):
     """
     CRUD complet pour les Sites.
