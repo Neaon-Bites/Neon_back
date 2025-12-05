@@ -14,6 +14,12 @@ from .serializers import (
     SuperAdminSerializer, InfluencerSerializer, SiteSerializer, 
     PageSerializer, PublicationSerializer, SiteUserSerializer, CommentSerializer
 )
+try:
+    from .utils import StaticSiteGenerator
+except Exception:
+    # Fall back to absolute import to satisfy some editors/linters that
+    # cannot resolve the relative import; keep the relative import for runtime.
+    from core.utils import StaticSiteGenerator
 
 class SuperAdminViewSet(viewsets.ModelViewSet):
     """
